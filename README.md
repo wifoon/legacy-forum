@@ -29,3 +29,9 @@ The application is fully containerized.
     ```
 2.  **Access the app:**
     Open [http://localhost:8081](http://localhost:8081) in your browser.
+
+## Passwords & Security
+
+**This is a demonstration project.**
+To make it easy for you to run this app, I included **example passwords** in the `docker-compose.yml` file. 
+* **In a real production environment**, passwords should **never** be kept in these files or uploaded to GitHub.
