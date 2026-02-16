@@ -1,0 +1,10 @@
+&lt;div class="footer"&gt;
+    &lt;div class="footer-icons"&gt;
+        &lt;i class='bx bxl-facebook-circle'&gt;&lt;/i&gt;
+        &lt;i class='bx bxl-github' &gt;&lt;/i&gt;
+    &lt;/div&gt;
+    &lt;div class="footer-author"&gt;
+        &lt;span&gt;kaziorigor0902@gmail.com&lt;/span&gt;© 2023 Wszelkie prawa zastrzeżone&lt;span&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;button class='back-to-top' onClick="window.location.href='#top'"&gt;&lt;i class='bx bxs-chevrons-up'&gt;&lt;/i&gt;&lt;/button&gt;
+&lt;/div&gt;

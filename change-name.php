@@ -1,0 +1,47 @@
+<?php
+    session_start();
+    include('connect.php');
+        if(isSet($_SESSION['username']))
+        {
+            function validation($input) {
+                $input = preg_replace('/\s+/', '', $input);
+                return $input;
+            }
+
+            $oldname = $_SESSION['username'];
+            $newname = validation($_POST['newname']);
+
+            if(empty($newname)) {
+                header("Location: settings.php?error=Musisz podać nową nazwę konta");
+                exit();
+            }
+            else {
+                $sql = "SELECT * FROM users WHERE username='$newname'";
+                $result = mysqli_query($connect, $sql);
+
+                if(mysqli_num_rows($result) > 0) {
+                    header("Location: settings.php?error=Podana nazwa użytkownika jest już zajęta");
+                    exit();
+                }
+                else {
+                    $sql2 = "UPDATE users SET username='$newname' WHERE username='$oldname'";
+                    $result2 = mysqli_query($connect, $sql2);
+
+                    if($result2) {
+                        header("Location: settings.php?success=Pomyślnie zmieniono nazwę konta!");
+                        $_SESSION['username'] = $newname;
+                    }
+                    else {
+                        header("Location: settings.php?error=Nieznany błąd");
+                        exit();
+                    }
+                }
+            }
+        }
+        else {
+            header("Location: index.php?error=Musisz być zalogowany");
+        }
+    
+
+    
+?>

@@ -1,0 +1,42 @@
+<?php
+    session_start();
+    include('connect.php');
+        if(isSet($_SESSION['username']))
+        {
+            $topicTitle = $_POST['topic-title'];
+            $topicDesc = $_POST['editor'];
+            $user_id = $_SESSION['id'];
+            $cat_id = $_SESSION['cat_id'];
+
+            if(empty($topicTitle))
+            {
+                header("Location: new-topic.php?error=Musisz podać tytuł tematu");
+                exit();
+            }
+            else if(empty($topicDesc))
+            {
+                header("Location: new-topic.php?error=Musisz podać treść tematu");
+                exit();
+            }
+            else {
+                $sql = "INSERT INTO topics(title, description, user_id, cat_id) VALUES('$topicTitle', '$topicDesc', '$user_id', '$cat_id')";
+                $results = mysqli_query($connect, $sql);
+
+                if($results)
+                {
+                    header("Location: new-topic.php?success=Pomyślnie utworzono temat");
+                    exit();
+                }
+                else {
+                    header("Location: new-topic.php?error=Błąd podczas tworzenia tematu");
+                    exit();
+                }
+            }
+        }
+        else {
+            header("Location: index.php?error=Musisz być zalogowany");
+        }
+    
+
+    
+?>

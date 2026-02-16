@@ -1,0 +1,96 @@
+:root {
+  --primary: #080c14;
+  --secondary: #0d121e;
+  --accent: #2b52ff;
+  --accent-hover: #1a3dd6;
+  --label: #ffffff;
+  --text: rgba(255, 255, 255, 0.6);
+}
+
+.documentation {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.instruction {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.instruction > div {
+  width: 78%;
+  background-color: var(--primary);
+  border-radius: 10px;
+  padding: 20px 30px 20px 30px;
+}
+
+.instruction > div > p {
+  color: var(--label);
+  font-size: 26px;
+}
+
+.instruction > div > span {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.doc-panel {
+  background-color: var(--primary);
+  border-radius: 10px;
+  width: 15%;
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: scroll;
+}
+
+.doc-content {
+  background-color: var(--primary);
+  border-radius: 10px;
+  width: 60%;
+  height: 700px;
+  margin-left: 3%;
+  overflow-y: scroll;
+}
+
+.doc-label {
+  color: var(--label);
+  font-size: 22px;
+  margin-top: 20px;
+}
+
+.doc-button {
+  border: none;
+  background: var(--secondary);
+  color: var(--label);
+  font-size: 16px;
+  width: 90%;
+  margin-top: 10px;
+  padding: 10px 16px 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.4s ease-in-out;
+}
+
+.doc-button:hover {
+  background: var(--accent-hover);
+}
+
+.doc-button:focus {
+  background-color: var(--accent);
+}
+
+#download {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.download {
+  text-decoration: none;
+  font-size: 30px;
+  color: var(--label);
+}

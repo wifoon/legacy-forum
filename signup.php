@@ -1,0 +1,85 @@
+<?php
+session_start();
+include('connect.php');
+
+    if(isSet($_POST['email']) && isSet($_POST['username']) && isSet($_POST['password']) && isSet($_POST['repassword'])) {
+
+        function validation($input) {
+            $input = preg_replace('/\s+/', '', $input);
+            return $input;
+        }
+
+        $email = validation($_POST['email']);
+        $username = validation($_POST['username']);
+        $password = validation($_POST['password']);
+        $repassword = validation($_POST['repassword']);
+
+        
+        if(empty($email)) {
+            header("Location: register.php?error=Musisz podać adres e-mail");
+            exit();
+        }
+        else if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header("Location: register.php?error=Niepoprawny adres e-mail");
+            exit();
+        }
+        else if(empty($username)) {
+            header("Location: register.php?error=Musisz podać nazwę użytkownika");
+            exit();
+        }
+        else if(empty($password)) {
+            header("Location: register.php?error=Musisz podać hasło");
+            exit();
+        }
+        else if(empty($repassword)) {
+            header("Location: register.php?error=Musisz powtórzyć hasło");
+            exit();
+        }
+        else if($password !== $repassword) {
+            header("Location: register.php?error=Hasła różnią się od siebie");
+            exit();
+        }
+        else if(!isSet($_POST['accept'])) {
+            header("Location: register.php?error=Zaakceptuj zasaday i warunki aby kontynuować");
+            exit();
+        }
+        else {
+            $password = md5($password);
+
+            $sql = "SELECT * FROM users WHERE username='$username'";
+            $result = mysqli_query($connect, $sql);
+
+            if(mysqli_num_rows($result) > 0) {
+                header("Location: register.php?error=Podana nazwa użytkownika jest już zajęta");
+                exit();
+            }
+            else {
+                $sql2 = "SELECT * FROM users WHERE email='$email'";
+                $result2 = mysqli_query($connect, $sql2);
+                if(mysqli_num_rows($result2) > 0) {
+                    header("Location: register.php?error=Podany adres e-mail jest już zajęty");
+                    exit();
+                }
+                else {
+                    $sql3 = "INSERT INTO users(username, password, email) VALUES('$username', '$password', '$email')";
+                    $result3 = mysqli_query($connect, $sql3);
+
+                    if($result2) {
+                        header("Location: register.php?success=Konto utworzono pomyślnie");
+                        exit();
+                    }
+                    else {
+                        header("Location: register.php?error=Nieznany błąd podczas tworzenia konta");
+                        exit();
+                    }
+                }
+            }
+        }
+    }
+
+    else {
+        header("Location: register.php");
+        exit();
+    }
+
+?>

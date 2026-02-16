@@ -1,0 +1,14 @@
+&lt;?php
+        $sname = "localhost";
+        $uname = "root";
+        $pswd = "";
+        $dbname = "forum_db";
+        
+
+    
+    $connect = mysqli_connect($sname, $uname, $pswd, $dbname);
+    if(!$connect)
+    {
+        echo "Polaczenie nieudane";
+    }
+?&gt;

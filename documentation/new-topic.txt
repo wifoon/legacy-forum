@@ -1,0 +1,91 @@
+&lt;?php
+    session_start();
+    if(isSet($_SESSION['id']) && isSet($_SESSION['username']))
+    {
+
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;script src="https://cdn.tiny.cloud/1/yd7a9zh5529c6im09xq1bc8x40abi36oqsgs156ppfjk4eon/tinymce/6/tinymce.min.js" referrerpolicy="origin"&gt;&lt;/script&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+    &lt;link rel="stylesheet" href="./style.css"&gt;
+    &lt;link rel="stylesheet" href="./footer/style.css"&gt;
+    &lt;title&gt;Forum&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php
+    if($_SESSION['ban'] !== '0')
+        {
+            echo "&lt;div class='ban'&gt;&lt;p&gt;ZBANOWANY!&lt;/p&gt;&lt;span&gt;Ze względu na twoje działania na forum, dostęp został zablokowany.&lt;/span&gt;&lt;/div&gt;";
+        }
+    ?&gt;
+    &lt;header&gt;
+        &lt;nav class="navbar"&gt;
+            &lt;div class="container-top"&gt;
+                &lt;div class="nav-top"&gt;
+                    &lt;a href="home.php"&gt;&lt;img class="logo" alt="logo" src="./images/logo.png"&gt;&lt;/a&gt;
+
+                    &lt;ul class="nav-profile"&gt;
+                        &lt;li&gt;&lt;img class="pfp" alt="pfp" src="./pfp/&lt;?php echo $_SESSION['pfp'];?&gt;"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;span&gt;Cześć, &lt;b&gt;&lt;?php echo $_SESSION['username']; ?&gt;&lt;/b&gt;!&lt;/span&gt;&lt;/li&gt;
+                        &lt;div class="divider"&gt;&lt;/div&gt;
+                        &lt;li&gt;&lt;a href="settings.php"&gt;&lt;i class='bx bx-cog bx-spin-hover'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="logout.php"&gt;&lt;i class='bx bx-log-out'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="container-bottom"&gt;
+                &lt;div class="nav-bottom"&gt;
+                    &lt;div class="nav-links"&gt;
+                        &lt;a class="nav-buttons" href="home.php"&gt;Home&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="contact.php"&gt;Kontakt&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="doc.php"&gt;Dokumentacja&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" class="search" onkeyup="search()" id="search" placeholder="Wyszukaj na naszym forum"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main&gt;
+        &lt;article class="new-topic"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="label"&gt;
+                    &lt;span&gt;Dodaj nowy temat&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;?php if(isSet($_GET['success'])) { ?&gt;
+                    &lt;p class="acc-success"&gt;&lt;?php echo $_GET['success']; ?&gt;&lt;/p&gt;
+                &lt;?php } ?&gt;
+                &lt;?php if(isSet($_GET['error'])) { ?&gt;
+                    &lt;p class="acc-error"&gt;&lt;?php echo $_GET['error']; ?&gt;&lt;/p&gt;
+                &lt;?php } ?&gt;
+                &lt;form class="topic-form" action="create-topic.php" method="POST"&gt;
+                    &lt;label for="topic-title"&gt;Tytuł tematu&lt;/label&gt;&lt;input class="topic-input" type="text" name="topic-title" id="topic-title"&gt;
+                    &lt;label for="editor"&gt;Treść&lt;/label&gt;&lt;textarea id="file-picker" class="editor" name="editor"&gt;&lt;/textarea&gt;
+                    &lt;input type="submit" name="submit" class="acc-button" value="Wyślij"&gt;&lt;/form&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+
+    &lt;footer&gt;
+        &lt;?php 
+            include("./footer/footer.html");
+        ?&gt;
+    &lt;/footer&gt;
+
+&lt;script src='./text-editor/main.js'&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+    }
+    else {
+        header("Location: index.php?error=Musisz być zalogowany");
+    }
+
+?&gt;

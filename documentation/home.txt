@@ -1,0 +1,243 @@
+&lt;?php
+    session_start();
+    include("connect.php");
+    setlocale( LC_ALL, array('pl_PL',  'polish.utf8'));
+    $user_id = $_SESSION['id'];
+    if(isSet($_SESSION['id']) && isSet($_SESSION['username']))
+    {
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+    &lt;link rel="stylesheet" href="./style.css"&gt;
+    &lt;link rel="stylesheet" href="./footer/style.css"&gt;
+    &lt;title&gt;Forum&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php
+    if($_SESSION['ban'] !== '0')
+        {
+            echo "&lt;div class='ban'&gt;&lt;p&gt;ZBANOWANY!&lt;/p&gt;&lt;span&gt;Ze względu na twoje działania na forum, dostęp został zablokowany.&lt;/span&gt;&lt;/div&gt;";
+        }
+    ?&gt;
+    &lt;header&gt;
+        &lt;nav class="navbar"&gt;
+            &lt;div class="container-top"&gt;
+                &lt;div class="nav-top"&gt;
+                &lt;a href="home.php"&gt;&lt;img class="logo" alt="logo" src="./images/logo.png"&gt;&lt;/a&gt;
+
+                    &lt;ul class="nav-profile"&gt;
+                        &lt;a href="user.php?id=&lt;?php echo $user_id; ?&gt;"&gt;&lt;li&gt;&lt;img class="pfp" alt="pfp" src="./pfp/&lt;?php echo $_SESSION['pfp'];?&gt;"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;span&gt;Cześć, &lt;b&gt;&lt;?php echo $_SESSION['username']; ?&gt;&lt;/b&gt;!&lt;/span&gt;&lt;/li&gt;&lt;/a&gt;
+                        &lt;div class="divider"&gt;&lt;/div&gt;
+                        &lt;li&gt;&lt;a href="settings.php"&gt;&lt;i class='bx bx-cog bx-spin-hover'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="logout.php"&gt;&lt;i class='bx bx-log-out'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="container-bottom"&gt;
+            &lt;div class="nav-bottom"&gt;
+                    &lt;div class="nav-links"&gt;
+                        &lt;a class="nav-buttons" href="home.php"&gt;Home&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="contact.php"&gt;Kontakt&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="doc.php"&gt;Dokumentacja&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" class="search" onkeyup="search()" id="search" placeholder="Wyszukaj na naszym forum"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="forum"&gt;
+        &lt;article class="hero-banner"&gt;
+            &lt;div class="container"&gt;
+                &lt;p class="hero-label"&gt;Witaj na forum&lt;/p&gt;
+                &lt;p class="hero-text"&gt;Jesteśmy społecznością programistów, którzy mają wspólną pasję - tworzenie nowych rzeczy za pomocą kodu. Dla nas programowanie to sposób na wyrażenie siebie i nauczanie się czegoś nowego każdego dnia. Dlatego też, na naszym forum znajdziesz wiele wartościowych dyskusji na temat różnych języków programowania, frameworków, narzędzi i technologii, a także interesujące projekty, w których możesz wziąć udział. U nas możesz poznać ludzi o podobnych zainteresowaniach i wymienić się wiedzą z innymi programistami z całego świata. Bądź z nami, a przekonasz się, że programowanie to nie tylko praca, ale także przygoda!&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="right"&gt;&lt;/div&gt;
+            &lt;div class="left"&gt;&lt;/div&gt;
+        &lt;/article&gt;
+
+
+        &lt;article class="topics"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="topics-main"&gt;
+                    
+
+                    &lt;?php
+                        $sql_section = "SELECT * FROM section";
+                        $results_section = mysqli_query($connect, $sql_section);
+                        while($row_section = mysqli_fetch_array($results_section)) {
+                            $section_id = $row_section['ID'];
+                            $section_title = $row_section['title'];
+                            echo "
+                                &lt;button class='collapsible'&gt;
+                                    &lt;div class='category-label'&gt;
+                                        &lt;span&gt;&lt;i class='bx bxs-dashboard'&gt;&lt;/i&gt;".$section_title."&lt;/span&gt;
+                                    &lt;/div&gt;
+                                    &lt;i class='bx bx-chevron-down'&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                                &lt;div class='coll-content'&gt;";
+                            $sql_cat = "SELECT * FROM category WHERE section='$section_id'";
+                            $results_cat = mysqli_query($connect, $sql_cat);
+                            while($row_cat = mysqli_fetch_array($results_cat)) {
+                                $cat_id = $row_cat['ID'];
+                                $cat_title = $row_cat['title'];
+                                $cat_desc = $row_cat['description'];
+                                $cat_type = $row_cat['type'];
+                                if($cat_type === '0') { $i_class = 'bx bxs-chat'; } 
+                                else if($cat_type === '1') { $i_class = 'bx bx-info-circle'; }
+                                else if($cat_type === '10') { $i_class = 'bx bxl-html5'; }
+                                else if($cat_type === '11') { $i_class = 'bx bxl-css3'; }
+                                else if($cat_type === '12') { $i_class = 'bx bxl-javascript'; }
+                                else if($cat_type === '13') { $i_class = 'bx bxl-php'; }
+
+                                $sql_topic =  "SELECT * FROM topics WHERE cat_id='$cat_id' ORDER BY ID DESC LIMIT 1";
+                                $results_topic = mysqli_query($connect, $sql_topic);
+                                if(mysqli_num_rows($results_topic) &lt;= 0 ) {
+                                    echo "
+                                    &lt;section class='topic-category'&gt;
+                                        &lt;div class='cat'&gt;
+                                            &lt;div class='cat-left'&gt;
+                                            &lt;div class='cat-icon'&gt;
+                                                &lt;i class='".$i_class."'&gt;&lt;/i&gt;
+                                            &lt;/div&gt;
+                                            &lt;div class='cat-label'&gt;
+                                                &lt;a href='category.php?id=".$cat_id."'&gt;&lt;p&gt;".$cat_title."&lt;/p&gt;&lt;span&gt;".$cat_desc."&lt;/span&gt;&lt;/a&gt;
+                                            &lt;/div&gt;&lt;/div&gt;
+                                            
+                                        &lt;/div&gt;
+                                    &lt;/section&gt;";
+                                }
+                                else {
+                                $row_topic = mysqli_fetch_array($results_topic);
+                                $topic_id = $row_topic['ID'];
+                                $topic_title = $row_topic['title'];
+                                $topic_date = $row_topic['date'];
+                                $topic_user = $row_topic['user_id'];
+                                if(strftime("%Y",strtotime($topic_date)) === '2023') { $topic_date = strftime("%e %B",strtotime($topic_date)); }
+                                else { $topic_date = strftime("%e %B %Y",strtotime($topic_date)); }
+                                $sql_user = "SELECT * FROM users WHERE ID='$topic_user'";
+                                $results_user = mysqli_query($connect, $sql_user);
+                                $row_user = mysqli_fetch_array($results_user);
+                                $username = $row_user['username'];
+                                $pfp = $row_user['pfp'];
+                                $rank = $row_user['rank'];
+                                    if($rank === "Administrator") { $class = "rank-admin"; }
+                                    else { $class = "username"; }
+                                
+
+                                echo "
+                                &lt;section class='topic-category'&gt;
+                                    &lt;div class='cat'&gt;
+                                        &lt;div class='cat-left'&gt;
+                                        &lt;div class='cat-icon'&gt;
+                                            &lt;i class='".$i_class."'&gt;&lt;/i&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class='cat-label'&gt;
+                                            &lt;a href='category.php?id=".$cat_id."'&gt;&lt;p&gt;".$cat_title."&lt;/p&gt;&lt;span&gt;".$cat_desc."&lt;/span&gt;&lt;/a&gt;
+                                        &lt;/div&gt;&lt;/div&gt;
+                                        &lt;div class='cat-right'&gt;
+                                            &lt;div class='cat-last-topic'&gt;&lt;img src='./pfp/".$pfp."'&gt;
+                                            &lt;a href='topic.php?id=".$topic_id."'&gt;
+                                            &lt;p&gt;".$topic_title."&lt;/p&gt;&lt;span&gt;Przez &lt;span class=".$class."&gt;".$username."&lt;/span&gt;, ".$topic_date."&lt;/span&gt;&lt;/a&gt;&lt;/div&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/section&gt;";
+                            }
+                        }
+                        echo "&lt;/div&gt;";
+                    }
+                    ?&gt;
+                    
+
+
+                    &lt;button class="collapsible"&gt;
+                        &lt;div class="category-label"&gt;
+                            &lt;span&gt;&lt;i class='bx bxs-dashboard'&gt;&lt;/i&gt;Statystyki&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;i class='bx bx-chevron-down' id="arrow"&gt;&lt;/i&gt;
+                    &lt;/button&gt;
+                    &lt;div class='coll-content'&gt;
+                        &lt;section class="forum-stats"&gt;
+                            &lt;div class="stats"&gt;
+                                &lt;?php
+                                $sql_counter1 = "SELECT ID FROM users";
+                                $results1 = mysqli_query($connect, $sql_counter1);
+                                $sql_counter2 = "SELECT ID FROM topics";
+                                $results2 = mysqli_query($connect, $sql_counter2);
+                                $users_counter = mysqli_num_rows($results1);
+                                $topics_counter = mysqli_num_rows($results2);
+                                echo "&lt;p&gt;".$users_counter."&lt;/p&gt;&lt;span&gt;Użytkowników&lt;/span&gt;";
+                                ?&gt;
+                            &lt;/div&gt;
+                            &lt;div class="stats"&gt;
+                                &lt;?php echo "&lt;p&gt;".$topics_counter."&lt;/p&gt;&lt;span&gt;Tematów&lt;/span&gt;"; ?&gt;
+                            &lt;/div&gt;
+                        &lt;/section&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="topics-panel"&gt;
+                    Panel
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+    &lt;footer&gt;
+        &lt;?php 
+            include("./footer/footer.html");
+        ?&gt;
+    &lt;/footer&gt;
+
+&lt;script&gt;
+var coll = document.getElementsByClassName("collapsible");
+// var icon = document.querySelector(".collapsible .bx-chevron-down");
+var i;
+
+for (i = 0; i &lt; coll.length; i++) {
+    
+    let current = coll[i];
+    current.addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        let icon;
+        
+        let icons = current.getElementsByClassName("bx");
+        icon = icons[1];
+
+        content.classList.toggle("coll-active")
+        icon.className = icon.className == "bx bx-chevron-down" ? "bx bx-chevron-left" : "bx bx-chevron-down"
+    });
+}
+&lt;/script&gt;
+
+&lt;script&gt;
+    function search() {
+        var search = document.getElementById('search').value.toUpperCase();
+        var name = document.getElementsByClassName('topics-display');
+
+        for(var i=0; i&lt;name.length; i++) {
+            a = name[i].getAttribute("value");
+            if(a.toUpperCase().indexOf(search) &gt; -1) {
+                name[i].style.display = "";
+            }
+            else {
+                name[i].style.display = "none";
+            }
+        }
+    }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+    }
+    else {
+        header("Location: index.php?error=Musisz być zalogowany");
+    }
+
+?&gt;

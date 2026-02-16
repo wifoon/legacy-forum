@@ -1,0 +1,121 @@
+&lt;?php
+    session_start();
+    include("connect.php");
+    if(isSet($_SESSION['id']) && isSet($_SESSION['username']))
+    {
+
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+    &lt;link rel="stylesheet" href="./style.css"&gt;
+    &lt;link rel="stylesheet" href="./footer/style.css"&gt;
+    &lt;title&gt;Forum&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php
+    if($_SESSION['ban'] !== '0')
+        {
+            echo "&lt;div class='ban'&gt;&lt;p&gt;ZBANOWANY!&lt;/p&gt;&lt;span&gt;Ze względu na twoje działania na forum, dostęp został zablokowany.&lt;/span&gt;&lt;/div&gt;";
+        }
+    ?&gt;
+    &lt;header&gt;
+        &lt;nav class="navbar"&gt;
+            &lt;div class="container-top"&gt;
+                &lt;div class="nav-top"&gt;
+                    &lt;a href="home.php"&gt;&lt;img class="logo" alt="logo" src="./images/logo.png"&gt;&lt;/a&gt;
+
+                    &lt;ul class="nav-profile"&gt;
+                        &lt;li&gt;&lt;img class="pfp" alt="pfp" src="./pfp/&lt;?php echo $_SESSION['pfp'];?&gt;"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;span&gt;Cześć, &lt;b&gt;&lt;?php echo $_SESSION['username']; ?&gt;&lt;/b&gt;!&lt;/span&gt;&lt;/li&gt;
+                        &lt;div class="divider"&gt;&lt;/div&gt;
+                        &lt;li&gt;&lt;a href="settings.php"&gt;&lt;i class='bx bx-cog bx-spin-hover'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="logout.php"&gt;&lt;i class='bx bx-log-out'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="container-bottom"&gt;
+                &lt;div class="nav-bottom"&gt;
+                    &lt;div class="nav-links"&gt;
+                        &lt;a class="nav-buttons" href="home.php"&gt;Home&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="contact.php"&gt;Kontakt&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="doc.php"&gt;Dokumentacja&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" class="search" onkeyup="search()" id="search" placeholder="Wyszukaj na naszym forum"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;div class="background"&gt;
+        &lt;div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;main class="acc-main"&gt;
+        &lt;article class="user-profile"&gt;
+            &lt;div class="label"&gt;
+                &lt;span&gt;Profil użytkownika&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="profile"&gt;
+                    &lt;div class="profile-info"&gt;
+                        &lt;?php
+                        $user_id = $_GET['id'];
+                        $sql_user = "SELECT * FROM users WHERE ID='$user_id'";
+                        $results_user = mysqli_query($connect, $sql_user);
+                        $row_user = mysqli_fetch_array($results_user);
+                        $sql_topcis = "SELECT * FROM topics WHERE user_id='$user_id'";
+                        $results_topics = mysqli_query($connect, $sql_topcis);
+                        $counter_topics = mysqli_num_rows($results_topics);
+                        $sql_posts = "SELECT * FROM posts WHERE user_id='$user_id'";
+                        $results_posts = mysqli_query($connect, $sql_posts);
+                        $counter_posts = mysqli_num_rows($results_posts);
+                        $user_pfp = $row_user['pfp'];
+                        $user_name = $row_user['username'];
+                        $user_rank = $row_user['rank'];
+                        if($user_rank === "Administrator") { $user_rank = "&lt;/i&gt;Administrator"; $class = "admin"; }
+                        else { $class = "user"; }
+                        echo "
+                        &lt;img src='./pfp/".$user_pfp."'&gt;
+                        &lt;div&gt;
+                            &lt;p&gt;".$user_name."&lt;/p&gt;
+                            &lt;span class='".$class."'&gt;".$user_rank."&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div class='profile-stats'&gt;
+                            &lt;div&gt;
+                                &lt;p&gt;".$counter_posts."&lt;/p&gt;
+                                &lt;span&gt;odpowiedzi&lt;/span&gt;
+                            &lt;/div&gt;
+                            &lt;div&gt;
+                                &lt;p&gt;".$counter_topics."&lt;/p&gt;
+                                &lt;span&gt;tematów&lt;/span&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;hr&gt;
+                        ";
+                        ?&gt;
+            &lt;/div&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+
+
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+    }
+    else {
+        header("Location: index.php?error=Musisz być zalogowany");
+    }
+
+?&gt;

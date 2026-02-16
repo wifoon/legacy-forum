@@ -1,0 +1,65 @@
+<?php
+    session_start();
+    include('connect.php');
+        if(isSet($_SESSION['username']))
+        {
+            if(isSet($_FILES['image']) && isSet($_POST['submit'])) {
+                $id = $_SESSION['id'];
+                $imgName = $_FILES['image']['name'];
+                $imgSize = $_FILES['image']['size'];
+                $imgTmp_name = $_FILES['image']['tmp_name'];
+                $error = $_FILES['image']['error'];
+
+                if($error === 0) {
+                    if($imgSize > 2097152) {
+                        header("Location: settings.php?error=Maksymalny rozmiar zdjęcia to 2MB");
+                        exit();
+                    }
+                    else {
+                        $extension = pathinfo($imgName, PATHINFO_EXTENSION);
+                        $extension = strtolower($extension);
+                        if($extension === "png" || $extension === "jpg" || $extension === "jpeg") {
+                            $random_imgName = uniqid("IMG-", true).'.'.$extension;
+                            $imgPath = './pfp/'.$random_imgName;
+                            move_uploaded_file($imgTmp_name, $imgPath);
+
+                            $sql = "UPDATE users SET pfp='$random_imgName' WHERE ID='$id'";
+                            $result = mysqli_query($connect, $sql);
+                            if($result) {
+                                $sql2 = "SELECT * FROM users WHERE ID='$id'";
+                                $result2 = mysqli_query($connect, $sql2);
+                                $row = mysqli_fetch_assoc($result2);
+                                $_SESSION['pfp'] = $row['pfp'];
+                                header("Location: settings.php?success=Poprawnie zaktualizowano zdjęcie");
+                                exit();
+                            }
+                            else {
+                                header("Location: settings.php?error=Błąd podczas aktalizacji zdjęcia");
+                                exit();
+                            }
+                        }
+                        else {
+                            header("Location: settings.php?error=Niepoprawne rozszerzenie pliku, dopuszczalne rozszerzenia: PNG, JPG, JPEG");
+                            exit();
+                        }
+                    }
+                }
+                else {
+                    header("Location: settings.php?error=Musisz wybrać zdjęcie");
+                    exit();
+                }
+
+            }
+            else {
+                header("Location: settings.php?error=Musisz wybrać zdjęcie");
+                exit();
+            }
+        }
+        else {
+            header("Location: index.php?error=Musisz być zalogowany");
+            exit();
+        }
+    
+
+    
+?>

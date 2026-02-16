@@ -1,0 +1,160 @@
+&lt;?php
+    session_start();
+    include("connect.php");
+    setlocale( LC_ALL, array('pl_PL',  'polish.utf8'));
+    if(isSet($_SESSION['id']) && isSet($_SESSION['username']))
+    {
+
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+    &lt;link rel="stylesheet" href="./style.css"&gt;
+    &lt;link rel="stylesheet" href="./footer/style.css"&gt;
+    &lt;title&gt;Forum&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php
+    if($_SESSION['ban'] !== '0')
+        {
+            echo "&lt;div class='ban'&gt;&lt;p&gt;ZBANOWANY!&lt;/p&gt;&lt;span&gt;Ze względu na twoje działania na forum, dostęp został zablokowany.&lt;/span&gt;&lt;/div&gt;";
+        }
+    ?&gt;
+    &lt;header&gt;
+        &lt;nav class="navbar"&gt;
+            &lt;div class="container-top"&gt;
+                &lt;div class="nav-top"&gt;
+                &lt;a href="home.php"&gt;&lt;img class="logo" alt="logo" src="./images/logo.png"&gt;&lt;/a&gt;
+
+                    &lt;ul class="nav-profile"&gt;
+                        &lt;li&gt;&lt;img class="pfp" alt="pfp" src="./pfp/&lt;?php echo $_SESSION['pfp'];?&gt;"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;span&gt;Cześć, &lt;b&gt;&lt;?php echo $_SESSION['username']; ?&gt;&lt;/b&gt;!&lt;/span&gt;&lt;/li&gt;
+                        &lt;div class="divider"&gt;&lt;/div&gt;
+                        &lt;li&gt;&lt;a href="settings.php"&gt;&lt;i class='bx bx-cog bx-spin-hover'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="logout.php"&gt;&lt;i class='bx bx-log-out'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="container-bottom"&gt;
+                &lt;div class="nav-bottom"&gt;
+                    &lt;div class="nav-links"&gt;
+                        &lt;a class="nav-buttons" href="home.php"&gt;Home&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="contact.php"&gt;Kontakt&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="doc.php"&gt;Dokumentacja&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" class="search" onkeyup="search()" id="search" placeholder="Wyszukaj na naszym forum"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="forum"&gt;
+        &lt;article class="hero-banner"&gt;
+            &lt;div class="container"&gt;
+                &lt;p class="hero-label"&gt;Witaj na forum&lt;/p&gt;
+                &lt;p class="hero-text"&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="right"&gt;&lt;/div&gt;
+            &lt;div class="left"&gt;&lt;/div&gt;
+        &lt;/article&gt;
+
+
+        &lt;article class="topics"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="topics-main"&gt;
+
+                    &lt;?php
+                        $cat_id = $_GET['id'];
+                        $_SESSION['cat_id'] = $cat_id;
+                        $sql_cat = "SELECT * FROM category WHERE ID='$cat_id'";
+                        $results_cat = mysqli_query($connect, $sql_cat);
+                        $row_cat = mysqli_fetch_array($results_cat);
+
+                        echo "&lt;div class='category-name-label'&gt;";
+                        echo "&lt;span&gt;".$row_cat['title']."&lt;/span&gt;&lt;a href='new-topic.php?id=".$_SESSION['cat_id']."'&gt;Dodaj nowy temat&lt;/a&gt;";
+                        echo "&lt;/div&gt;";
+                        $sql = "SELECT * FROM topics WHERE cat_id='$cat_id'";
+                        $results = mysqli_query($connect, $sql);
+                        while($row = mysqli_fetch_array($results)) {
+                            $user_id = $row['user_id'];
+                            $topic_id = $row['ID'];
+                            $topic_name = $row['title'];
+                            $locked = $row['locked'];
+                            
+                            $sql_users = "SELECT * FROM users WHERE ID='$user_id'";
+                            $results_users = mysqli_query($connect, $sql_users);
+                            $row_users = mysqli_fetch_array($results_users);
+                            $author_rank = $row_users['rank'];
+                            if($author_rank === "Administrator") { $class = "rank-admin"; }
+                            else { $class = "username"; }
+
+                            $date = $row['date'];
+                            if(strftime("%Y",strtotime($date)) === '2023') { $date = strftime("%e %B",strtotime($date)); }
+                            else { $date = strftime("%e %B %Y",strtotime($date)); }
+
+                            $sql_counter = "SELECT * FROM posts WHERE topic_id='$topic_id'";
+                            $results_counter = mysqli_query($connect, $sql_counter);
+                            $counter = mysqli_num_rows($results_counter);
+                            if($counter === 1) { $odpowiedz = " odpowiedź"; }
+                            else { $odpowiedz = " odpowiedzi"; }
+
+
+                            echo "&lt;div value='".$topic_name."' class='topics-display'&gt;";
+                            echo "&lt;div class='container'&gt;";
+                            echo "&lt;div class='topics-display-label'&gt;";
+                            if($locked === '1') {
+                                echo "&lt;p&gt;&lt;i title='Ten temat jest zamknięty' class='bx bxs-lock-alt'&gt;&lt;/i&gt;&lt;a href='topic.php?id=".$topic_id."'&gt;".$topic_name."&lt;/a&gt;&lt;/p&gt;";
+                            }
+                            else {
+                                echo "&lt;p&gt;&lt;a href='topic.php?id=".$topic_id."'&gt;".$topic_name."&lt;/a&gt;&lt;/p&gt;";
+                            }
+                            echo "&lt;span&gt;Przez &lt;/span&gt;&lt;span class='".$class."'&gt;".$row_users['username']."&lt;/span&gt;&lt;span&gt;, ".$date."&lt;/div&gt;";
+                            echo "&lt;div class='topics-display-info'&gt;&lt;span class='posts-counter'&gt;".$counter.$odpowiedz."&lt;/span&gt;&lt;div class='topic-divider'&gt;&lt;/div&gt;&lt;a href='./user.php?id=".$row_users['ID']."'&gt;&lt;img src='./pfp/".$row_users['pfp']."'&gt;&lt;/a&gt;&lt;/div&gt;";
+                            echo "&lt;/div&gt;&lt;/div&gt;";
+                        }
+                    ?&gt;
+                &lt;/div&gt;
+
+                &lt;div class="topics-panel"&gt;
+                    Panel
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+
+    &lt;footer&gt;
+        &lt;?php 
+            include("./footer/footer.html");
+        ?&gt;
+    &lt;/footer&gt;
+
+    &lt;script&gt;
+        function search() {
+            var search = document.getElementById('search').value.toUpperCase();
+            var name = document.getElementsByClassName('topics-display');
+
+            for(var i=0; i&lt;name.length; i++) {
+                a = name[i].getAttribute("value");
+                if(a.toUpperCase().indexOf(search) &gt; -1) {
+                    name[i].style.display = "";
+                }
+                else {
+                    name[i].style.display = "none";
+                }
+            }
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+    }
+    else {
+        header("Location: index.php?error=Musisz być zalogowany");
+    }
+
+?&gt;

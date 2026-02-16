@@ -1,0 +1,207 @@
+&lt;?php
+    session_start();
+    include("connect.php");
+    if(isSet($_SESSION['id']) && isSet($_SESSION['username']))
+    {
+
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;script src="https://cdn.tiny.cloud/1/yd7a9zh5529c6im09xq1bc8x40abi36oqsgs156ppfjk4eon/tinymce/6/tinymce.min.js" referrerpolicy="origin"&gt;&lt;/script&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+    &lt;script src="./admin-menu/main.js"&gt;&lt;/script&gt;
+    &lt;script src="./text-editor/main.js"&gt;&lt;/script&gt;
+    &lt;link rel="stylesheet" href="./style.css"&gt;
+    &lt;link rel="stylesheet" href="./admin-menu/style.css"&gt;
+    &lt;link rel="stylesheet" href="./footer/style.css"&gt;
+    &lt;title&gt;Forum&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php
+    if($_SESSION['ban'] !== '0')
+        {
+            echo "&lt;div class='ban'&gt;&lt;p&gt;ZBANOWANY!&lt;/p&gt;&lt;span&gt;Ze względu na twoje działania na forum, dostęp został zablokowany.&lt;/span&gt;&lt;/div&gt;";
+        }
+    ?&gt;
+    &lt;header&gt;
+        &lt;nav class="navbar"&gt;
+            &lt;div class="container-top"&gt;
+                &lt;div class="nav-top"&gt;
+                &lt;a href="home.php"&gt;&lt;img class="logo" alt="logo" src="./images/logo.png"&gt;&lt;/a&gt;
+
+                    &lt;ul class="nav-profile"&gt;
+                        &lt;li&gt;&lt;img class="pfp" alt="pfp" src="./pfp/&lt;?php echo $_SESSION['pfp'];?&gt;"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;span&gt;Cześć, &lt;b&gt;&lt;?php echo $_SESSION['username']; ?&gt;&lt;/b&gt;!&lt;/span&gt;&lt;/li&gt;
+                        &lt;div class="divider"&gt;&lt;/div&gt;
+                        &lt;li&gt;&lt;a href="settings.php"&gt;&lt;i class='bx bx-cog bx-spin-hover'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="logout.php"&gt;&lt;i class='bx bx-log-out'&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="container-bottom"&gt;
+                &lt;div class="nav-bottom"&gt;
+                    &lt;div class="nav-links"&gt;
+                        &lt;a class="nav-buttons" href="home.php"&gt;Home&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="contact.php"&gt;Kontakt&lt;/a&gt;
+                        &lt;a class="nav-buttons" href="doc.php"&gt;Dokumentacja&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" class="search" onkeyup="search()" id="search" placeholder="Wyszukaj na naszym forum"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="forum"&gt;
+
+        &lt;article class="topic"&gt;
+            &lt;div class="container"&gt;
+                &lt;?php
+                    $topic_id = $_GET['id'];
+                    $user_rank = $_SESSION['rank'];
+                    $_SESSION['topic_id'] = $topic_id;
+                    $sql_topic = "SELECT * FROM topics WHERE ID='$topic_id'";
+                    $results_topic = mysqli_query($connect, $sql_topic);
+                    $row_topic = mysqli_fetch_array($results_topic);
+                    $topic_date = $row_topic['date'];
+                    $locked = $row_topic['locked'];
+                    $_SESSION['locked'] = $locked;
+                    $author_id = $row_topic['user_id'];
+                    setlocale( LC_ALL, array( 'pl_PL',  'polish.utf8'));
+                    $topic_date = strftime("%e %B %Y",strtotime($topic_date));
+
+                    $sql_author = "SELECT * FROM users WHERE ID='$author_id'";
+                    $results_author = mysqli_query($connect, $sql_author);
+                    $row_author = mysqli_fetch_array($results_author);
+                    $author_username = $row_author['username'];
+                    $author_pfp = $row_author['pfp'];
+                    $author_rank = $row_author['rank'];
+                    if($author_rank === "Administrator") { $author_rank = "&lt;/i&gt;Administrator"; $class = "rank-admin"; }
+                    else { $class = "rank-user"; }
+
+
+                    echo "
+                    &lt;div class='topic-top'&gt;
+                        &lt;p class='topic-post-label'&gt;".$row_topic['title']."&lt;/p&gt;
+                        &lt;div class='dropdown'&gt;
+                            &lt;i onclick='dropdown()' class='bx bx-dots-horizontal-rounded'&gt;&lt;/i&gt;";
+                            if($user_rank === 'Administrator') {
+                        echo "&lt;div id='menu' class='dropdown-content'&gt;";
+                    if($locked === '0') {
+                        echo "&lt;a href='./admin/lock.php?id=".$topic_id."'&gt;Zamknij temat&lt;/a&gt;";
+                    }
+                    else {
+                        echo "&lt;a href='./admin/lock.php?id=".$topic_id."'&gt;Otwórz temat&lt;/a&gt;";
+                    }
+                    echo "
+                            &lt;a id='edit-btn'&gt;Edytuj&lt;/a&gt;
+                            &lt;a class='delete' href='./admin/delete.php?id=".$topic_id."'&gt;Usuń&lt;/a&gt;
+                        &lt;/div&gt;";
+                    }
+                    echo "
+                    &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class='topic-author'&gt;
+                    &lt;a href='./user.php?id=".$row_author['ID']."'&gt;&lt;img src='./pfp/".$author_pfp."'&gt;&lt;/a&gt;
+                        &lt;div class='author-label'&gt;
+                            &lt;p&gt;Przez ".$author_username.",&lt;/p&gt;&lt;span&gt;".$topic_date."&lt;/span&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;&lt;hr&gt;";
+                        
+                    echo "
+                    &lt;div class='post'&gt;
+                    &lt;div class='post-author'&gt;
+                        &lt;div&gt;
+                            &lt;p&gt;".$author_username."&lt;/p&gt;
+                            &lt;img src='./pfp/".$author_pfp."'&gt;
+                            &lt;p class='".$class."'&gt;".$author_rank."&lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class='post-content'&gt;
+                        &lt;p class='post-date'&gt;Opublikowano ".$topic_date."&lt;/p&gt;
+                        &lt;div id='topic-content' class='content'&gt;".$row_topic['description']."&lt;/div&gt;
+                    &lt;/div&gt;&lt;/div&gt;&lt;hr&gt;";
+
+                    $sql_posts = "SELECT * FROM posts WHERE topic_id='$topic_id'";
+                    $results_posts = mysqli_query($connect, $sql_posts);
+                    while($row_posts = mysqli_fetch_array($results_posts)) {
+                        $post_date = strftime("%e %B %Y",strtotime($row_posts['date']));
+                        $post_author_id = $row_posts['user_id'];
+                        $sql_post_user = "SELECT * FROM users WHERE ID='$post_author_id'";
+                        $results_post_user = mysqli_query($connect, $sql_post_user);
+                        $row_post_user = mysqli_fetch_array($results_post_user);
+                        $author_rank = $row_post_user['rank'];
+                        if($author_rank === "Administrator") { $class = "rank-admin"; }
+                        else { $class = "rank-user"; }
+
+                        echo "
+                        &lt;div class='post'&gt;
+                        &lt;div class='post-author'&gt;
+                            &lt;div&gt;
+                                &lt;p&gt;".$row_post_user['username']."&lt;/p&gt;
+                                &lt;img src='./pfp/".$row_post_user['pfp']."'&gt;
+                                &lt;p class='".$class."'&gt;".$author_rank."&lt;/p&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div class='post-content'&gt;
+                            &lt;p class='post-date'&gt;Opublikowano ".$post_date."&lt;/p&gt;
+                            &lt;div class='content'&gt;".$row_posts['description']."&lt;/div&gt;
+                        &lt;/div&gt;&lt;/div&gt;&lt;hr&gt;";
+                    }
+
+
+                    echo "&lt;div class='add-post'&gt;";
+                    if($locked === '0') {
+                        echo "&lt;form method='POST' action='create-post.php'&gt;";
+                        echo "&lt;div class='add-box'&gt;&lt;img src='./pfp/".$_SESSION['pfp']."'&gt;";
+                        echo "&lt;div id='replace'&gt;&lt;button onClick='replace(this)'&gt;Dodaj odpowiedź do tematu...&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/form&gt;";
+                    }
+                    else {
+                        echo "&lt;div class='add-box'&gt;&lt;img src='./pfp/".$_SESSION['pfp']."'&gt;";
+                        echo "&lt;div class='locked'&gt;&lt;i class='bx bxs-error'&gt;&lt;/i&gt;Ten temat został zamknięty. Brak możliwości dodania odpowiedzi.&lt;/div&gt;&lt;/div&gt;";
+                    }
+                    echo "&lt;/div&gt;";
+                ?&gt;
+                   
+                
+            &lt;/div&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+
+    &lt;footer&gt;
+        &lt;?php 
+            include("./footer/footer.html");
+        ?&gt;
+    &lt;/footer&gt;
+&lt;script&gt;
+    function edit() {
+        var div = document.getElementById('topic-content');
+        var content = "&lt;?php echo $row_topic['description']; ?&gt;";
+    div.outerHTML = "&lt;?php echo '&lt;form method="POST" action="./admin/edit.php?id='.$topic_id.'"&gt;&lt;textarea class="post-editor" name="post-editor"&gt;'.$row_topic['description'].'&lt;/textarea&gt;&lt;input type="submit" name="submit" class="save-button" value="Zapisz"&gt;&lt;/form&gt;'; ?&gt;";
+    tinymce.init({
+        selector: 'textarea',
+        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+        tinycomments_mode: 'embedded',
+        tinycomments_author: 'Author name',
+        skin: "oxide-dark",
+        content_css: "dark",
+    });
+    }
+
+    var a = document.getElementById('edit-btn')
+    a.addEventListener('click', edit);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+    }
+    else {
+        header("Location: index.php?error=Musisz być zalogowany");
+    }
+
+?&gt;

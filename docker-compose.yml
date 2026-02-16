@@ -1,0 +1,26 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: forum_db
+      MYSQL_ROOT_PASSWORD: secret_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+
+  app:
+    build: .
+    container_name: forum_app
+    ports:
+      - "8081:80"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: secret_password
+      DB_NAME: forum_db
+    depends_on:
+      - db
+
+volumes:
+  db_data:
