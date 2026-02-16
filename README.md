@@ -8,8 +8,11 @@ A legacy forum application originally developed in XAMPP, now moved to a **moder
 
 ## The Migration Story
 
-This project shows how to move an old application from a local "all-in-one" server (XAMPP) to an **automated setup**.
-* **Challenge:** Running an older PHP app that uses old functions and needs a manual database setup.
+### **Humble Beginnings (School Project)**
+To be honest this is an old project I found on my disk. I wrote it some time ago for a school assignment where the teacher specifically required us to use **PHP**. It’s definitely not my best or most advanced code, but it is a perfect example for a **DevOps migration task**.
+
+### **The DevOps Challenge**
+* **Challenge:** Taking an old school project and making it run anywhere without installing XAMPP.
 * **Solution:** **Splitting** the app into separate parts (PHP, MySQL) and making the setup automatic so it works for everyone.
 
 ## Tech Stack
